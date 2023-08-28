@@ -11,8 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DataJpaTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -32,11 +34,10 @@ public class AuthorDaoIntegrationTest {
         assertThat(authorSaved).isNotNull();
 
 //        Delete
-        authorDao.deleteAuthorById(authorSaved);
+        authorDao.deleteAuthorById(authorSaved.getId());
+        assertThrows(EmptyResultDataAccessException.class,
+                ()->{authorDao.getById(authorSaved.getId());});
 
-        Author authorDeleted = authorDao.getById(authorSaved.getId());
-
-        assertThat(authorDeleted).isNull();
 
     }
 
@@ -74,7 +75,7 @@ public class AuthorDaoIntegrationTest {
 
     @Test
     @Order(2)
-    void testGetAuthorByName() {
+    void testGetByName() {
         Author author = authorDao.getById(1L);
         assertThat(author).isNotNull();
         Author author1 = authorDao.getByName(author.getFirstName(),author.getLastName());
@@ -86,7 +87,7 @@ public class AuthorDaoIntegrationTest {
 
     @Test
     @Order(1)
-    void testGetAuthorById() {
+    void testGetById() {
         Author author = authorDao.getById(1L);
         assertThat(author).isNotNull();
         System.out.println(author);
